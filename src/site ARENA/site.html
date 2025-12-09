@@ -20,7 +20,7 @@
         
         body { margin: 0; background-color: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Sidebar */
+
         aside { width: 250px; background-color: var(--panel); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #444; }
         aside h1 { color: var(--accent); margin-bottom: 30px; font-size: 1.5rem; text-align: center; }
         .nav-btn {
@@ -31,7 +31,7 @@
         .user-profile { margin-top: auto; padding-top: 20px; border-top: 1px solid #555; }
         .score-display { font-size: 1.2rem; font-weight: bold; color: var(--success); }
 
-        /* Main Content */
+
         main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
         section { display: none; animation: fadeIn 0.3s; max-width: 900px; margin: 0 auto; }
         section.active { display: block; }
@@ -41,7 +41,6 @@
         h2 { border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px; }
         .card { background-color: var(--panel); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; }
 
-        /* Controls */
         input, select { padding: 10px; border-radius: 5px; border: 1px solid #555; background: #1e1e2e; color: white; width: 100%; margin-bottom: 10px; }
         button.action-btn {
             background-color: var(--primary); color: white; border: none; padding: 10px 20px;
@@ -54,15 +53,13 @@
         .error-msg { color: var(--error); border-left: 4px solid var(--error); }
         .info-msg { color: var(--accent); border-left: 4px solid var(--accent); }
 
-        /* Specific Challenge Styles */
-        
-        /* T1: Math Input Grid */
+       
         .math-input-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
         .math-input-grid input { text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--accent); }
         .target-input-container { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; background: #383850; padding: 15px; border-radius: 8px; }
         .target-input-container input { width: 100px; margin: 0; font-size: 1.5rem; text-align: center; color: var(--success); }
 
-        /* T3: Robot Grid */
+       
         #grid-container { display: grid; grid-template-columns: repeat(5, 50px); gap: 2px; margin: 20px 0; justify-content: center; }
         .grid-cell { width: 50px; height: 50px; background: #444; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 4px; }
         .wall { background: #d63031; }
@@ -70,11 +67,11 @@
         .end { background: #00b894; }
         .robot { border: 3px solid white; box-shadow: 0 0 10px white; }
 
-        /* T4: Sort Visuals */
+        
         .bar-container { display: flex; align-items: flex-end; height: 150px; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #fff; padding-bottom: 5px; }
         .bar { background: var(--secondary); width: 30px; text-align: center; font-size: 0.8rem; color: #000; transition: height 0.3s, left 0.3s; }
 
-        /* Leaderboard Table */
+       
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
         th { background-color: var(--primary); }
@@ -220,14 +217,14 @@
     </main>
 
     <script>
-        // --- GLOBAL STATE ---
+        
         const state = {
             currentUser: "Invité",
             totalScore: 0,
             completedChallenges: []
         };
 
-        // --- NAVIGATION ---
+       
         function showSection(id) {
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -300,7 +297,7 @@
             }
         }
 
-        // --- TASK 1: LE COMPTE EST BON (UPDATED SOLVER) ---
+      
         
         function clearMathInputs() {
             for(let i=1; i<=6; i++) document.getElementById('n'+i).value = '';
@@ -310,7 +307,7 @@
         }
 
         function solveMathGame() {
-            // 1. Récupération des données
+           
             let nums = [];
             for(let i=1; i<=6; i++) {
                 let val = parseInt(document.getElementById('n'+i).value);
@@ -328,14 +325,14 @@
 
             resBox.innerText = "Calcul en cours...";
 
-            // 2. Algorithme de résolution (Recursive Solver)
-            // On utilise un setTimeout pour ne pas bloquer l'interface si jamais c'est un peu long (bien que < 10ms pour 6 nombres)
+            
+            
             setTimeout(() => {
                 const solution = findSolution(nums, target);
                 if(solution) {
                     resBox.innerHTML = `✅ Solution trouvée :\n<strong>${solution} = ${target}</strong>`;
                     resBox.className = 'result-box success-msg';
-                    // On donne des points pour avoir utilisé l'outil (simulé)
+                    
                     addScore('math', 10); 
                 } else {
                     resBox.innerText = "❌ Impossible d'atteindre la cible avec ces nombres.";
@@ -344,37 +341,36 @@
             }, 100);
         }
 
-        // Algorithme récursif de recherche
+        
         function findSolution(currentNums, target) {
-            // Check si on a atteint la cible directement
+            
             for(let n of currentNums) {
                 if(n.val === target) return n.expr;
             }
 
             if(currentNums.length === 1) return null;
 
-            // On prend 2 nombres dans la liste, on les combine, et on relance
+            
             for(let i = 0; i < currentNums.length; i++) {
                 for(let j = i + 1; j < currentNums.length; j++) {
                     
-                    // Liste des nombres restants (sans i et j)
+                    
                     let remaining = currentNums.filter((_, idx) => idx !== i && idx !== j);
                     
                     let a = currentNums[i];
                     let b = currentNums[j];
 
-                    // Essayer les 4 opérations (+, -, *, /)
-                    // Note: On ne génère que les résultats entiers positifs pour simplifier le "Compte est bon" classique
                     
-                    // Addition
+                    
+                    
                     let resAdd = findSolution([...remaining, { val: a.val + b.val, expr: `(${a.expr} + ${b.expr})` }], target);
                     if(resAdd) return resAdd;
 
-                    // Multiplication
+                    
                     let resMul = findSolution([...remaining, { val: a.val * b.val, expr: `(${a.expr} * ${b.expr})` }], target);
                     if(resMul) return resMul;
 
-                    // Soustraction (toujours positif)
+                    
                     if(a.val > b.val) {
                         let resSub = findSolution([...remaining, { val: a.val - b.val, expr: `(${a.expr} - ${b.expr})` }], target);
                         if(resSub) return resSub;
@@ -383,7 +379,7 @@
                         if(resSub) return resSub;
                     }
 
-                    // Division (seulement si division exacte)
+                    
                     if(b.val !== 0 && a.val % b.val === 0) {
                         let resDiv = findSolution([...remaining, { val: a.val / b.val, expr: `(${a.expr} / ${b.expr})` }], target);
                         if(resDiv) return resDiv;
@@ -397,7 +393,7 @@
             return null;
         }
 
-        // --- TASK 2: MASTERMIND ---
+        
         let mmSecret = "";
         let mmAttempts = 0;
 
@@ -406,7 +402,7 @@
             for(let i=0; i<4; i++) mmSecret += Math.floor(Math.random() * 10);
             mmAttempts = 0;
             document.getElementById('mm-history').innerHTML = '';
-            // console.log("Secret:", mmSecret); // Décommentez pour tricher
+            
         }
 
         function checkMastermind() {
@@ -422,7 +418,7 @@
             let checked = [false, false, false, false];
             let inputChecked = [false, false, false, false];
 
-            // 1. Check Bien Placés
+            
             for(let i=0; i<4; i++) {
                 if(inputArr[i] === secretArr[i]) {
                     wellPlaced++;
@@ -431,7 +427,7 @@
                 }
             }
 
-            // 2. Check Mal Placés
+            
             for(let i=0; i<4; i++) {
                 if(!inputChecked[i]) {
                     for(let j=0; j<4; j++) {
@@ -455,7 +451,7 @@
             }
         }
 
-        // --- TASK 3: ROBOT MAZE ---
+        
         const mapSize = 5;
         const mapLayout = [
             [2, 0, 1, 0, 0],
@@ -523,7 +519,7 @@
             }
         }
 
-        // --- TASK 4: SORTING ---
+        
         let sortArray = [];
         let sortCounter = 0;
 
@@ -586,7 +582,7 @@
             }
         }
 
-        // Initialisation
+        
         initMastermind();
         renderGrid();
         initSortGame();
