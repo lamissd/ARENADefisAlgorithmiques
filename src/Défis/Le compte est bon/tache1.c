@@ -24,6 +24,8 @@ void chercher(int tab[], int n, int cible, int profondeur) {
         }
     }
 
+    if (n <= 1) return;
+
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
             int a = tab[i];
@@ -149,3 +151,4 @@ int main() {
 
     return 0;
 }
+
