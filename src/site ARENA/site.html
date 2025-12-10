@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgoArena - Plateforme de Défis</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --bg: #1e1e2e;
+            --panel: #2d2d44;
+            --text: #ffffff;
+            --success: #00b894;
+            --error: #d63031;
+            --accent: #fdcb6e;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { margin: 0; background-color: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+
+        aside { width: 250px; background-color: var(--panel); padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #444; }
+        aside h1 { color: var(--accent); margin-bottom: 30px; font-size: 1.5rem; text-align: center; }
+        .nav-btn {
+            background: none; border: none; color: var(--text); padding: 15px; text-align: left; cursor: pointer;
+            transition: 0.3s; font-size: 1rem; border-radius: 8px; margin-bottom: 5px;
+        }
+        .nav-btn:hover, .nav-btn.active { background-color: var(--primary); }
+        .user-profile { margin-top: auto; padding-top: 20px; border-top: 1px solid #555; }
+        .score-display { font-size: 1.2rem; font-weight: bold; color: var(--success); }
+
+
+        main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        section { display: none; animation: fadeIn 0.3s; max-width: 900px; margin: 0 auto; }
+        section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px; }
+        .card { background-color: var(--panel); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; }
+
+        input, select { padding: 10px; border-radius: 5px; border: 1px solid #555; background: #1e1e2e; color: white; width: 100%; margin-bottom: 10px; }
+        button.action-btn {
+            background-color: var(--primary); color: white; border: none; padding: 10px 20px;
+            border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        button.action-btn:hover { background-color: var(--secondary); transform: scale(1.02); }
+        
+        .result-box { margin-top: 15px; padding: 15px; border-radius: 5px; background: #181824; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+        .success-msg { color: var(--success); border-left: 4px solid var(--success); }
+        .error-msg { color: var(--error); border-left: 4px solid var(--error); }
+        .info-msg { color: var(--accent); border-left: 4px solid var(--accent); }
+
+       
+        .math-input-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+        .math-input-grid input { text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+        .target-input-container { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; background: #383850; padding: 15px; border-radius: 8px; }
+        .target-input-container input { width: 100px; margin: 0; font-size: 1.5rem; text-align: center; color: var(--success); }
+
+       
+        #grid-container { display: grid; grid-template-columns: repeat(5, 50px); gap: 2px; margin: 20px 0; justify-content: center; }
+        .grid-cell { width: 50px; height: 50px; background: #444; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 4px; }
+        .wall { background: #d63031; }
+        .start { background: #0984e3; }
+        .end { background: #00b894; }
+        .robot { border: 3px solid white; box-shadow: 0 0 10px white; }
+
+        
+        .bar-container { display: flex; align-items: flex-end; height: 150px; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #fff; padding-bottom: 5px; }
+        .bar { background: var(--secondary); width: 30px; text-align: center; font-size: 0.8rem; color: #000; transition: height 0.3s, left 0.3s; }
+
+       
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
+        th { background-color: var(--primary); }
+        tr:hover { background-color: #383850; }
+
+        .badge { background: var(--accent); color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <h1>AlgoArena 🚀</h1>
+        <button class="nav-btn active" onclick="showSection('home')">🏠 Accueil</button>
+        <button class="nav-btn" onclick="showSection('math')">🧮 Le Compte est Bon</button>
+        <button class="nav-btn" onclick="showSection('mastermind')">🔐 Mastermind</button>
+        <button class="nav-btn" onclick="showSection('robot')">🤖 Course de Robot</button>
+        <button class="nav-btn" onclick="showSection('sort')">📊 Tri Ultime</button>
+        <button class="nav-btn" onclick="showSection('leaderboard')">🏆 Classement</button>
+
+        <div class="user-profile">
+            <p>Joueur: <span id="playerNameDisplay">Invité</span></p>
+            <p>Score Total: <span class="score-display" id="globalScore">0</span> pts</p>
+        </div>
+    </aside>
+
+    <main>
+        <section id="home" class="active">
+            <h2>Bienvenue sur AlgoArena</h2>
+            <div class="card">
+                <h3>Prêt à coder ?</h3>
+                <p>Entrez votre nom pour commencer à enregistrer vos scores.</p>
+                <input type="text" id="usernameInput" placeholder="Votre pseudo...">
+                <button class="action-btn" onclick="registerUser()">Commencer la session</button>
+            </div>
+            <div class="card">
+                <h3>Objectifs</h3>
+                <ul>
+                    <li>Résoudre des problèmes algorithmiques.</li>
+                    <li>Comparer vos performances.</li>
+                    <li>Grimper dans le classement !</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="math">
+            <h2>Défi 1 : Le Compte est Bon <span class="badge">Solver</span></h2>
+            <div class="card">
+                <p>Entrez 6 nombres et un nombre cible. L'IA vérifiera si le calcul est possible.</p>
+                
+                <label>Vos 6 nombres :</label>
+                <div class="math-input-grid">
+                    <input type="number" id="n1" value="25">
+                    <input type="number" id="n2" value="10">
+                    <input type="number" id="n3" value="5">
+                    <input type="number" id="n4" value="2">
+                    <input type="number" id="n5" value="7">
+                    <input type="number" id="n6" value="3">
+                </div>
+
+                <div class="target-input-container">
+                    <label>🎯 Cible à atteindre :</label>
+                    <input type="number" id="math-target" value="133">
+                </div>
+                
+                <button class="action-btn" onclick="solveMathGame()">Lancer le Solver</button>
+                <button class="action-btn" style="background:#555" onclick="clearMathInputs()">Effacer</button>
+                
+                <div id="math-result" class="result-box">En attente des données...</div>
+            </div>
+        </section>
+
+        <section id="mastermind">
+            <h2>Défi 2 : Mastermind Algorithmique <span class="badge">Points: 30</span></h2>
+            <div class="card">
+                <p>Devinez la séquence secrète de 4 chiffres (0-9). Essayez de le faire en moins de 10 essais.</p>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="mm-input" placeholder="Ex: 1234" maxlength="4">
+                    <button class="action-btn" onclick="checkMastermind()">Essayer</button>
+                </div>
+                <div id="mm-history" class="result-box" style="height: 150px; overflow-y: auto;">
+                    Historique des essais...
+                </div>
+                <button class="action-btn" style="background:#555; margin-top:10px;" onclick="initMastermind()">Réinitialiser</button>
+            </div>
+        </section>
+
+        <section id="robot">
+            <h2>Défi 3 : Course de Robots <span class="badge">Points: 50 (Max)</span></h2>
+            <div class="card">
+                <p>Guidez le robot (Bleu) vers la sortie (Vert) en évitant les murs (Rouge).<br>
+                Utilisez les lettres : <code>N</code> (Nord), <code>S</code> (Sud), <code>E</code> (Est), <code>O</code> (Ouest).</p>
+                
+                <div id="grid-container">
+                    </div>
+
+                <input type="text" id="robot-input" placeholder="Ex: EESSE" style="text-transform: uppercase;">
+                <button class="action-btn" onclick="runRobot()">Exécuter le programme</button>
+                
+                <div id="robot-result" class="result-box">Statut du robot: En attente</div>
+            </div>
+        </section>
+
+        <section id="sort">
+            <h2>Défi 4 : Tri Ultime <span class="badge">Points: 20</span></h2>
+            <div class="card">
+                <p>Triez ce tableau en échangeant les éléments. Entrez les deux indices à échanger (ex: "0 1").<br>
+                Objectif : Tableau croissant avec un minimum d'échanges.</p>
+                
+                <div id="sort-visual" class="bar-container">
+                    </div>
+                
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="swap-i" placeholder="Index 1" style="width:100px;">
+                    <input type="number" id="swap-j" placeholder="Index 2" style="width:100px;">
+                    <button class="action-btn" onclick="performSwap()">Échanger</button>
+                </div>
+                
+                <p>Comparaisons/Echanges: <span id="sort-counter">0</span></p>
+                <div id="sort-result" class="result-box">État: Non trié</div>
+                <button class="action-btn" style="background:#555; margin-top:10px;" onclick="initSortGame()">Mélanger</button>
+            </div>
+        </section>
+
+        <section id="leaderboard">
+            <h2>Tableau d'Honneur</h2>
+            <div class="card">
+                <p>Les meilleurs algorithmes et leurs créateurs.</p>
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Programmeur</th>
+                            <th>Score Total</th>
+                            <th>Défis Réussis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <button class="action-btn" style="margin-top:20px;" onclick="resetLeaderboard()">Réinitialiser le classement</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        
+        const state = {
+            currentUser: "Invité",
+            totalScore: 0,
+            completedChallenges: []
+        };
+
+       
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(id).classList.add('active');
+            const btns = document.querySelectorAll('.nav-btn');
+            if(id === 'home') btns[0].classList.add('active');
+            if(id === 'math') btns[1].classList.add('active');
+            if(id === 'mastermind') btns[2].classList.add('active');
+            if(id === 'robot') btns[3].classList.add('active');
+            if(id === 'sort') btns[4].classList.add('active');
+            if(id === 'leaderboard') {
+                btns[5].classList.add('active');
+                renderLeaderboard();
+            }
+        }
+
+        function registerUser() {
+            const name = document.getElementById('usernameInput').value;
+            if(name.trim() !== "") {
+                state.currentUser = name;
+                document.getElementById('playerNameDisplay').innerText = name;
+                alert(`Bienvenue, ${name} ! À vos claviers.`);
+            }
+        }
+
+        function addScore(challengeId, points) {
+            if (state.completedChallenges.includes(challengeId)) return;
+            state.completedChallenges.push(challengeId);
+            state.totalScore += points;
+            document.getElementById('globalScore').innerText = state.totalScore;
+            saveScore();
+        }
+
+        function saveScore() {
+            let db = JSON.parse(localStorage.getItem('algoArenaDB')) || [];
+            const existingIndex = db.findIndex(u => u.name === state.currentUser);
+            if (existingIndex >= 0) {
+                if (state.totalScore > db[existingIndex].score) {
+                    db[existingIndex].score = state.totalScore;
+                    db[existingIndex].challenges = state.completedChallenges.length;
+                }
+            } else {
+                db.push({ name: state.currentUser, score: state.totalScore, challenges: state.completedChallenges.length });
+            }
+            localStorage.setItem('algoArenaDB', JSON.stringify(db));
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.querySelector('#leaderboard-table tbody');
+            tbody.innerHTML = '';
+            let db = JSON.parse(localStorage.getItem('algoArenaDB')) || [];
+            db.sort((a, b) => b.score - a.score);
+
+            db.forEach((user, index) => {
+                const tr = `<tr>
+                    <td>#${index + 1}</td>
+                    <td>${user.name}</td>
+                    <td>${user.score}</td>
+                    <td>${user.challenges}</td>
+                </tr>`;
+                tbody.innerHTML += tr;
+            });
+        }
+        
+        function resetLeaderboard() {
+            if(confirm("Effacer tout le classement ?")) {
+                localStorage.removeItem('algoArenaDB');
+                renderLeaderboard();
+            }
+        }
+
+      
+        
+        function clearMathInputs() {
+            for(let i=1; i<=6; i++) document.getElementById('n'+i).value = '';
+            document.getElementById('math-target').value = '';
+            document.getElementById('math-result').innerText = 'En attente...';
+            document.getElementById('math-result').className = 'result-box';
+        }
+
+        function solveMathGame() {
+           
+            let nums = [];
+            for(let i=1; i<=6; i++) {
+                let val = parseInt(document.getElementById('n'+i).value);
+                if(!isNaN(val)) nums.push({ val: val, expr: val.toString() });
+            }
+            let target = parseInt(document.getElementById('math-target').value);
+
+            const resBox = document.getElementById('math-result');
+            
+            if(nums.length === 0 || isNaN(target)) {
+                resBox.innerText = "Veuillez entrer des nombres et une cible valides.";
+                resBox.className = 'result-box error-msg';
+                return;
+            }
+
+            resBox.innerText = "Calcul en cours...";
+
+            
+            
+            setTimeout(() => {
+                const solution = findSolution(nums, target);
+                if(solution) {
+                    resBox.innerHTML = `✅ Solution trouvée :\n<strong>${solution} = ${target}</strong>`;
+                    resBox.className = 'result-box success-msg';
+                    
+                    addScore('math', 10); 
+                } else {
+                    resBox.innerText = "❌ Impossible d'atteindre la cible avec ces nombres.";
+                    resBox.className = 'result-box info-msg';
+                }
+            }, 100);
+        }
+
+        
+        function findSolution(currentNums, target) {
+            
+            for(let n of currentNums) {
+                if(n.val === target) return n.expr;
+            }
+
+            if(currentNums.length === 1) return null;
+
+            
+            for(let i = 0; i < currentNums.length; i++) {
+                for(let j = i + 1; j < currentNums.length; j++) {
+                    
+                    
+                    let remaining = currentNums.filter((_, idx) => idx !== i && idx !== j);
+                    
+                    let a = currentNums[i];
+                    let b = currentNums[j];
+
+                    
+                    
+                    
+                    let resAdd = findSolution([...remaining, { val: a.val + b.val, expr: `(${a.expr} + ${b.expr})` }], target);
+                    if(resAdd) return resAdd;
+
+                    
+                    let resMul = findSolution([...remaining, { val: a.val * b.val, expr: `(${a.expr} * ${b.expr})` }], target);
+                    if(resMul) return resMul;
+
+                    
+                    if(a.val > b.val) {
+                        let resSub = findSolution([...remaining, { val: a.val - b.val, expr: `(${a.expr} - ${b.expr})` }], target);
+                        if(resSub) return resSub;
+                    } else {
+                        let resSub = findSolution([...remaining, { val: b.val - a.val, expr: `(${b.expr} - ${a.expr})` }], target);
+                        if(resSub) return resSub;
+                    }
+
+                    
+                    if(b.val !== 0 && a.val % b.val === 0) {
+                        let resDiv = findSolution([...remaining, { val: a.val / b.val, expr: `(${a.expr} / ${b.expr})` }], target);
+                        if(resDiv) return resDiv;
+                    }
+                    if(a.val !== 0 && b.val % a.val === 0) {
+                        let resDiv = findSolution([...remaining, { val: b.val / a.val, expr: `(${b.expr} / ${a.expr})` }], target);
+                        if(resDiv) return resDiv;
+                    }
+                }
+            }
+            return null;
+        }
+
+        
+        let mmSecret = "";
+        let mmAttempts = 0;
+
+        function initMastermind() {
+            mmSecret = "";
+            for(let i=0; i<4; i++) mmSecret += Math.floor(Math.random() * 10);
+            mmAttempts = 0;
+            document.getElementById('mm-history').innerHTML = '';
+            
+        }
+
+        function checkMastermind() {
+            const input = document.getElementById('mm-input').value;
+            if(input.length !== 4) return alert("Entrez 4 chiffres.");
+            
+            mmAttempts++;
+            let wellPlaced = 0;
+            let wrongPlaced = 0;
+            
+            let secretArr = mmSecret.split('');
+            let inputArr = input.split('');
+            let checked = [false, false, false, false];
+            let inputChecked = [false, false, false, false];
+
+            
+            for(let i=0; i<4; i++) {
+                if(inputArr[i] === secretArr[i]) {
+                    wellPlaced++;
+                    checked[i] = true;
+                    inputChecked[i] = true;
+                }
+            }
+
+            
+            for(let i=0; i<4; i++) {
+                if(!inputChecked[i]) {
+                    for(let j=0; j<4; j++) {
+                        if(!checked[j] && inputArr[i] === secretArr[j]) {
+                            wrongPlaced++;
+                            checked[j] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const history = document.getElementById('mm-history');
+            const entry = `<div>Essai #${mmAttempts}: <strong>${input}</strong> | Bien: ${wellPlaced}, Mal: ${wrongPlaced}</div>`;
+            history.innerHTML = entry + history.innerHTML;
+
+            if(wellPlaced === 4) {
+                let points = Math.max(0, 30 - (mmAttempts * 2));
+                history.innerHTML = `<div class="success-msg">VICTOIRE en ${mmAttempts} coups ! +${points} pts</div>` + history.innerHTML;
+                addScore('mastermind', points);
+            }
+        }
+
+        
+        const mapSize = 5;
+        const mapLayout = [
+            [2, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0],
+            [1, 1, 0, 1, 0],
+            [0, 0, 0, 0, 3]
+        ];
+        let robotPos = {x: 0, y: 0};
+
+        function renderGrid() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+            for(let y=0; y<mapSize; y++) {
+                for(let x=0; x<mapSize; x++) {
+                    let div = document.createElement('div');
+                    div.classList.add('grid-cell');
+                    if(mapLayout[y][x] === 1) div.classList.add('wall');
+                    if(mapLayout[y][x] === 2) div.classList.add('start');
+                    if(mapLayout[y][x] === 3) div.classList.add('end');
+                    if(x === robotPos.x && y === robotPos.y) {
+                        div.innerHTML = '🤖';
+                        div.classList.add('robot');
+                    }
+                    container.appendChild(div);
+                }
+            }
+        }
+
+        async function runRobot() {
+            robotPos = {x: 0, y: 0};
+            renderGrid();
+            
+            const commands = document.getElementById('robot-input').value.toUpperCase();
+            const resBox = document.getElementById('robot-result');
+            resBox.className = 'result-box';
+            resBox.innerText = "Exécution...";
+
+            for(let char of commands) {
+                await new Promise(r => setTimeout(r, 500));
+                let nextX = robotPos.x;
+                let nextY = robotPos.y;
+
+                if(char === 'N') nextY--;
+                if(char === 'S') nextY++;
+                if(char === 'E') nextX++;
+                if(char === 'O') nextX--;
+
+                if(nextX < 0 || nextX >= mapSize || nextY < 0 || nextY >= mapSize || mapLayout[nextY][nextX] === 1) {
+                    resBox.innerText = "CRASH ! Le robot a heurté un obstacle.";
+                    resBox.className = "result-box error-msg";
+                    return;
+                }
+                
+                robotPos = {x: nextX, y: nextY};
+                renderGrid();
+            }
+
+            if(mapLayout[robotPos.y][robotPos.x] === 3) {
+                resBox.innerText = "ARRIVÉE ATTEINTE ! +50 Points";
+                resBox.className = "result-box success-msg";
+                addScore('robot', 50);
+            } else {
+                resBox.innerText = "Le robot s'est arrêté mais n'est pas à la sortie.";
+            }
+        }
+
+        
+        let sortArray = [];
+        let sortCounter = 0;
+
+        function initSortGame() {
+            sortArray = [50, 20, 90, 10, 60, 30, 80, 40];
+            sortCounter = 0;
+            document.getElementById('sort-counter').innerText = 0;
+            document.getElementById('sort-result').innerText = "État: Non trié";
+            document.getElementById('sort-result').className = "result-box";
+            renderSort();
+        }
+
+        function renderSort() {
+            const container = document.getElementById('sort-visual');
+            container.innerHTML = '';
+            sortArray.forEach((val, idx) => {
+                let bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = (val * 1.5) + 'px';
+                bar.innerText = val;
+                bar.title = `Index ${idx}`;
+                container.appendChild(bar);
+            });
+        }
+
+        function performSwap() {
+            const i = parseInt(document.getElementById('swap-i').value);
+            const j = parseInt(document.getElementById('swap-j').value);
+
+            if(isNaN(i) || isNaN(j) || i < 0 || j < 0 || i >= sortArray.length || j >= sortArray.length) {
+                alert("Indices invalides");
+                return;
+            }
+
+            let temp = sortArray[i];
+            sortArray[i] = sortArray[j];
+            sortArray[j] = temp;
+            
+            sortCounter++;
+            document.getElementById('sort-counter').innerText = sortCounter;
+            renderSort();
+            checkSortWin();
+        }
+
+        function checkSortWin() {
+            let isSorted = true;
+            for(let k=0; k<sortArray.length-1; k++) {
+                if(sortArray[k] > sortArray[k+1]) {
+                    isSorted = false;
+                    break;
+                }
+            }
+
+            if(isSorted) {
+                const resBox = document.getElementById('sort-result');
+                let pts = Math.max(5, 20 - Math.floor(sortCounter/2));
+                resBox.innerText = `TRI TERMINÉ en ${sortCounter} échanges ! +${pts} pts`;
+                resBox.className = "result-box success-msg";
+                addScore('sort', pts);
+            }
+        }
+
+        
+        initMastermind();
+        renderGrid();
+        initSortGame();
+        renderLeaderboard();
+
+    </script>
+</body>
+</html>
