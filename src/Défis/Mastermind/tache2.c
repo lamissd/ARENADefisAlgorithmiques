@@ -98,5 +98,6 @@ int main() {
 
     afficher_fin(secret, gagne, tours);
 
+    if (gagne) return tours;
     return 0;
 }
