@@ -6,9 +6,6 @@
 #define N 6
 #define INF 99999
 
-// ==========================
-// Affiche matrice
-// ==========================
 void print_graph(int g[N][N]) {
     printf("Graphe pondéré :\n\n");
 
@@ -20,9 +17,6 @@ void print_graph(int g[N][N]) {
     }
 }
 
-// ==========================
-// Dijkstra
-// ==========================
 void dijkstra(int g[N][N], int start, int dist[]) {
     int visited[N];
     for(int i=0;i<N;i++){ dist[i]=INF; visited[i]=0; }
@@ -47,9 +41,6 @@ void dijkstra(int g[N][N], int start, int dist[]) {
     }
 }
 
-// ==========================
-// Verifie chemin joueur
-// ==========================
 int cost_path(int g[N][N], int path[], int len) {
     int cost = 0;
 
@@ -63,15 +54,11 @@ int cost_path(int g[N][N], int path[], int len) {
     return cost;
 }
 
-// ==========================
-// MAIN
-// ==========================
 int main() {
     srand(time(NULL));
 
     int g[N][N];
-
-    // génération graphe
+    
     for(int i=0;i<N;i++)
         for(int j=0;j<N;j++)
             if(i==j) g[i][j]=0;
