@@ -1,133 +1,127 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-#define MAX 100
+#define SIZE 7
 
-typedef struct {
-    int x, y;
-} Point;
+char lab[SIZE][SIZE] = {
+    {'#','#','#','#','#','#','#'},
+    {'#','S',' ',' ','#',' ','#'},
+    {'#',' ','#',' ','#',' ','#'},
+    {'#',' ',' ',' ',' ',' ','#'},
+    {'#','#',' ','#','#',' ','#'},
+    {'#',' ',' ',' ',' ','E','#'},
+    {'#','#','#','#','#','#','#'}
+};
 
-char grid[MAX][MAX];
-int visited[MAX][MAX];
-Point parent[MAX][MAX];
-
-Point queue[MAX * MAX];
-int front = 0, back = 0;
-
-int rows, cols;
-int start_x, start_y;
-int end_x, end_y;
-
-void enqueue(Point p) {
-    queue[back++] = p;
-}
-
-Point dequeue() {
-    return queue[front++];
-}
-
-int isEmpty() {
-    return front == back;
-}
-
-void loadGrid(const char *filename) {
-    FILE *f = fopen(filename, "r");
-    if (!f) {
-        printf("Erreur ouverture fichier\n");
-        exit(1);
-    }
-
-    rows = 0;
-    while (fgets(grid[rows], MAX, f)) {
-        rows++;
-    }
-    fclose(f);
-
-    cols = 0;
-    while (grid[0][cols] != '\n' && grid[0][cols] != '\0')
-        cols++;
-
-    for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++) {
-            if (grid[i][j] == 'S') {
-                start_x = i;
-                start_y = j;
-            }
-            if (grid[i][j] == 'E') {
-                end_x = i;
-                end_y = j;
-            }
-        }
-}
-
-void BFS() {
-    enqueue((Point){start_x, start_y});
-    visited[start_x][start_y] = 1;
-
-    int dx[4] = {1, -1, 0, 0};
-    int dy[4] = {0, 0, 1, -1};
-
-    while (!isEmpty()) {
-        Point p = dequeue();
-
-        if (p.x == end_x && p.y == end_y)
-            return; 
-
-        for (int i = 0; i < 4; i++) {
-            int nx = p.x + dx[i];
-            int ny = p.y + dy[i];
-
-            if (nx >= 0 && nx < rows && ny >= 0 && ny < cols &&
-                grid[nx][ny] != '#' &&
-                !visited[nx][ny]) {
-
-                visited[nx][ny] = 1;
-                parent[nx][ny] = p;
-                enqueue((Point){nx, ny});
-            }
-        }
-    }
-}
-
-void reconstructPath() {
-    Point path[MAX * MAX];
-    int len = 0;
-
-    Point curr = (Point){end_x, end_y};
-
-    while (!(curr.x == start_x && curr.y == start_y)) {
-        path[len++] = curr;
-        curr = parent[curr.x][curr.y];
-    }
-
-    path[len++] = (Point){start_x, start_y};
-
-    printf("\nChemin trouvé :\n");
-
-    for (int i = len - 1; i >= 0; i--) {
-        printf("(%d,%d) ", path[i].x, path[i].y);
-    }
+void afficherLabyrinthe(int rx, int ry) {
     printf("\n");
-
-    printf("\nSéquence de mouvements : ");
-
-    for (int i = len - 1; i > 0; i--) {
-        Point a = path[i];
-        Point b = path[i-1];
-
-        if (b.x == a.x + 1) printf("S ");
-        else if (b.x == a.x - 1) printf("N ");
-        else if (b.y == a.y + 1) printf("E ");
-        else if (b.y == a.y - 1) printf("O ");
+    for(int i = 0; i < SIZE; i++) {
+        for(int j = 0; j < SIZE; j++) {
+            if(i == rx && j == ry)
+                printf("R ");
+            else
+                printf("%c ", lab[i][j]);
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
 int main() {
-    loadGrid("maze.txt");
-
-    BFS();
-    reconstructPath();
-
+    printf("========================================\n");
+    printf("       COURSE DE ROBOTS - LABYRINTHE\n");
+    printf("========================================\n");
+    
+    afficherLabyrinthe(1, 1);
+    
+    printf("\nObjectif: Deplacer le robot R vers E\n");
+    printf("\nEntrez votre sequence de mouvements:\n");
+    printf("N = Nord (haut)\n");
+    printf("S = Sud (bas)\n");
+    printf("E = Est (droite)\n");
+    printf("O = Ouest (gauche)\n");
+    printf("\nExemple: EESSEEO\n");
+    printf("\nVotre sequence: ");
+    
+    char sequence[100];
+    scanf("%s", sequence);
+    
+    int rx = 1, ry = 1; // Position de depart
+    int ex = 5, ey = 5; // Position d'arrivee
+    
+    printf("\n========================================\n");
+    printf("       EXECUTION DE VOTRE SEQUENCE\n");
+    printf("========================================\n");
+    
+    int valide = 1;
+    int longueur = strlen(sequence);
+    
+    for(int i = 0; i < longueur; i++) {
+        char move = sequence[i];
+        int nx = rx, ny = ry;
+        
+        if(move == 'N' || move == 'n') {
+            nx = rx - 1;
+            printf("\nMouvement %d: N (Nord)\n", i+1);
+        }
+        else if(move == 'S' || move == 's') {
+            nx = rx + 1;
+            printf("\nMouvement %d: S (Sud)\n", i+1);
+        }
+        else if(move == 'E' || move == 'e') {
+            ny = ry + 1;
+            printf("\nMouvement %d: E (Est)\n", i+1);
+        }
+        else if(move == 'O' || move == 'o') {
+            ny = ry - 1;
+            printf("\nMouvement %d: O (Ouest)\n", i+1);
+        }
+        else {
+            printf("\nMouvement %d: '%c' INVALIDE!\n", i+1, move);
+            valide = 0;
+            break;
+        }
+        
+        // Verifier si le mouvement est possible
+        if(nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) {
+            printf("ERREUR: Hors des limites!\n");
+            valide = 0;
+            break;
+        }
+        
+        if(lab[nx][ny] == '#') {
+            printf("ERREUR: Collision avec un mur!\n");
+            valide = 0;
+            break;
+        }
+        
+        rx = nx;
+        ry = ny;
+        printf("Position: (%d, %d)\n", rx, ry);
+        afficherLabyrinthe(rx, ry);
+    }
+    
+    printf("\n========================================\n");
+    printf("              RESULTAT\n");
+    printf("========================================\n");
+    
+    if(valide) {
+        if(rx == ex && ry == ey) {
+            printf("\n*** VICTOIRE! ***\n");
+            printf("Vous avez atteint l'arrivee en %d mouvements!\n", longueur);
+            printf("Votre solution: %s\n", sequence);
+        } else {
+            printf("\n*** ECHEC! ***\n");
+            printf("Vous n'avez pas atteint l'arrivee.\n");
+            printf("Position finale: (%d, %d)\n", rx, ry);
+            printf("Position cible: (%d, %d)\n", ex, ey);
+        }
+    } else {
+        printf("\n*** SEQUENCE INVALIDE! ***\n");
+        printf("La sequence contient des mouvements impossibles.\n");
+    }
+    
+    printf("\n========================================\n");
+    
     return 0;
+}
 }
