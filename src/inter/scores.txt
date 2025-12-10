@@ -1,0 +1,12 @@
+Lamiss;Course;987658108
+de;Robots;987658108
+Lamiss;nkehgkvr;35
+lamiss;course;1981749663
+de;robots;1981749663
+lamiss;mastermind;0
+yasmine;le;1981749663
+compte;est;1981749663
+bon;yasmine;0
+yasmine;course;0
+de;robots;0
+yasmine;coursederobots;50;yasmine;1
