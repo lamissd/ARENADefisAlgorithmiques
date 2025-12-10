@@ -45,7 +45,6 @@ typedef struct {
 
 EtapeCompte historique_compte[10];
 
-// Labyrinthe global (Pour le défi Labyrinthe)
 char lab[SIZE_LABY][SIZE_LABY] = {
     {'#','#','#','#','#','#','#'},
     {'#','S',' ',' ','#',' ','#'},
@@ -60,7 +59,6 @@ char lab[SIZE_LABY][SIZE_LABY] = {
 
 int calculScore(double temps, int essais, int difficulte)
 {
-    // Score = difficulté*1000 - (temps * 5) - (essais * 10)
     int score = difficulte * 1000 - (temps * 5) - (essais * 10);
     if (score < 0)
         score = 0;
@@ -74,14 +72,13 @@ int chargerScores(ScoreEntry tab[], int max)
         return 0;
 
     int count = 0;
-    // Utiliser un format structuré pour la lecture
     while (count < max && fscanf(f, "%s %s %d %lf %d %d",
                                  tab[count].nom,
                                  tab[count].defi,
                                  &tab[count].score,
                                  &tab[count].temps,
                                  &tab[count].essais,
-                                 &tab[count].difficulte) == 6) // Vérifier que 6 éléments sont lus
+                                 &tab[count].difficulte) == 6) 
     {
         count++;
     }
@@ -136,7 +133,6 @@ void afficherScores()
 
 void trierScores(ScoreEntry tab[], int n)
 {
-    // Tri par sélection (simple) par ordre décroissant de score
     int i, j;
     for (i = 0; i < n - 1; i++)
     {
@@ -167,7 +163,7 @@ void afficherMeilleursScores()
 
     printf("\n===== MEILLEURS SCORES (TRIÉS) =====\n");
 
-    for (int i = 0; i < n && i < 10; i++) // Afficher le Top 10
+    for (int i = 0; i < n && i < 10; i++) 
     {
         printf("%2d) %-8s | Défi: %-9s | Score: %5d | Temps: %.2f s | Essais: %d\n",
                i + 1,
@@ -208,14 +204,12 @@ int chercher(int tab[], int n, int cible, int profondeur) {
             EtapeCompte temp;
             int r;
 
-            // Addition
             temp.v1 = a; temp.v2 = b; temp.op = '+'; temp.res = a + b;
             historique_compte[profondeur] = temp;
             suivant[idx] = a + b;
             r = chercher(suivant, n - 1, cible, profondeur + 1);
             if (r != -1) return r;
 
-            // Multiplication
             if (a != 1 && b != 1) {
                 temp.v1 = a; temp.v2 = b; temp.op = '*'; temp.res = a * b;
                 historique_compte[profondeur] = temp;
@@ -224,7 +218,6 @@ int chercher(int tab[], int n, int cible, int profondeur) {
                 if (r != -1) return r;
             }
 
-            // Soustraction
             if (a != b) {
                 int g = (a > b) ? a : b;
                 int p = (a > b) ? b : a;
@@ -237,7 +230,6 @@ int chercher(int tab[], int n, int cible, int profondeur) {
                 }
             }
 
-            // Division (a / b)
             if (b > 1 && a % b == 0) {
                 temp.v1 = a; temp.v2 = b; temp.op = '/'; temp.res = a / b;
                 historique_compte[profondeur] = temp;
@@ -246,7 +238,6 @@ int chercher(int tab[], int n, int cible, int profondeur) {
                 if (r != -1) return r;
             }
 
-            // Division (b / a)
             if (a > 1 && b % a == 0 && a != b) {
                 temp.v1 = b; temp.v2 = a; temp.op = '/'; temp.res = b / a;
                 historique_compte[profondeur] = temp;
@@ -292,16 +283,15 @@ int run_defi_compte_est_bon() {
     }
     printf("\n");
     
-    // Le solveur tente de trouver la solution.
     int steps_solution = chercher(nombres, MAX_NUMBERS_COMPTE, cible, 0);
 
     if (steps_solution != -1) {
         printf("\nSolution trouvee en %d etapes (votre code) :\n", steps_solution);
         afficher_solution_compte(steps_solution);
-        return 1; // Retourne 1 pour succès
+        return 1;
     } else {
         printf("\nAucune solution exacte trouvee.\n");
-        return 0; // Retourne 0 pour échec
+        return 0;
     }
 }
 
@@ -399,10 +389,10 @@ int run_defi_robot_labyrinthe() {
     
     if(valide && rx == ex && ry == ey) {
         printf("\n*** ARRIVÉE ATTEINTE en %d mouvements ***\n", longueur);
-        return longueur; // Nombre de tentatives/mouvements
+        return longueur; 
     } else {
         printf("\n*** ECHEC ! Non atteint ou sequence invalide. ***\n");
-        return 9999; // Pénalité pour échec
+        return 9999;
     }
 }
 
@@ -481,12 +471,12 @@ int run_defi_mastermind() {
 
     if (gagne) {
         printf("\n BRAVO ! VOUS AVEZ GAGNE EN %d ESSAIS !\n", tours);
-        return tours; // Nombre d'essais
+        return tours; 
     } else {
         printf("\n ECHEC ! Plus d'essais. La sequence etait : ");
         for (int i = 0; i < TAILLE_CODE; i++) printf("%d ", secret[i]);
         printf("\n");
-        return MAX_ESSAIS + 1; // Pénalité
+        return MAX_ESSAIS + 1; 
     }
 }
 
@@ -539,7 +529,6 @@ int run_defi_tri_ultime() {
     printf("\n🎉 Resultat trie :\n");
     print_array(arr, n);
     
-    // Pour simplifier, on considère que l'exécution complète est un succès
     return 1; 
 }
 
@@ -624,7 +613,7 @@ int run_defi_dijkstra() {
         if (scanf("%d", &temp_input) != 1) { 
             while (getchar() != '\n');
             printf("Erreur de lecture. Retourne 0 essais.\n");
-            return 0; // 0 essais pour un échec critique
+            return 0; 
         }
         if(temp_input == -1) break;
         path[len++] = temp_input;
@@ -646,8 +635,6 @@ int run_defi_dijkstra() {
 
     printf("Votre cout : %d\n", player_cost);
 
-    // Retourne le coût (utilisé comme une mesure d'essais/performance inverse)
-    // Plus le coût est bas, meilleure est la performance (donc moins de "pénalité d'essais")
     return player_cost; 
 }
 
@@ -657,7 +644,6 @@ void jouerDefi(int choix)
 {
     char nom[30];
     printf("\nEntrez votre nom : ");
-    // Nettoyage avant la lecture d'une chaîne
     while (getchar() != '\n');
     if (scanf("%29s", nom) != 1) {
         strcpy(nom, "Joueur");
@@ -673,38 +659,33 @@ void jouerDefi(int choix)
     {
     case 1:
         strcpy(nomDefi, "CompteBon");
-        difficulte = 9; // Grande difficulté
-        // Retourne 1 (succès) ou 0 (échec) -> utilisé dans la formule de score.
+        difficulte = 9;
         essais_ou_performance = run_defi_compte_est_bon(); 
-        if (essais_ou_performance == 0) difficulte = 0; // Si échec, annuler la difficulté
-        essais_ou_performance = 1; // On force essais à 1 pour la formule de score si succès/échec
+        if (essais_ou_performance == 0) difficulte = 0; 
+        essais_ou_performance = 1;
         break;
     case 2:
         strcpy(nomDefi, "Robot");
         difficulte = 7;
-        // Retourne la longueur du chemin (pénalité si 9999).
         essais_ou_performance = run_defi_robot_labyrinthe(); 
-        if (essais_ou_performance == 9999) difficulte = 0; // Échec
+        if (essais_ou_performance == 9999) difficulte = 0;
         break;
     case 3:
         strcpy(nomDefi, "Mastermind");
         difficulte = 6;
-        // Retourne le nombre d'essais (pénalité si > MAX_ESSAIS).
         essais_ou_performance = run_defi_mastermind();
-        if (essais_ou_performance > MAX_ESSAIS) difficulte = 0; // Échec
+        if (essais_ou_performance > MAX_ESSAIS) difficulte = 0;
         break;
     case 4:
         strcpy(nomDefi, "TriUltime");
         difficulte = 3; 
-        // Retourne 1 (succès) ou 0 (échec) -> utilisé dans la formule de score.
         essais_ou_performance = run_defi_tri_ultime();
         if (essais_ou_performance == 0) difficulte = 0;
-        essais_ou_performance = 1; // On force essais à 1 pour la formule de score
+        essais_ou_performance = 1; 
         break;
     case 5:
         strcpy(nomDefi, "Dijkstra");
         difficulte = 8;
-        // Retourne le coût du chemin. Si 0, cela signifie échec (dans ce contexte).
         essais_ou_performance = run_defi_dijkstra(); 
         if (essais_ou_performance == 0) difficulte = 0;
         break;
@@ -718,7 +699,6 @@ void jouerDefi(int choix)
 
     printf("\n Temps utilise : %.2f secondes\n", temps);
 
-    // Enregistrer score
     saveScore(nom, nomDefi, temps, essais_ou_performance, difficulte);
 }
 
@@ -741,7 +721,7 @@ void menu()
         printf("Votre choix : ");
 
         if (scanf("%d", &choix) != 1) {
-             while (getchar() != '\n'); // Nettoyer le buffer
+             while (getchar() != '\n');
              printf("Entree invalide.\n");
              choix = 0;
              continue;
